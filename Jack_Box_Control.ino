@@ -1,24 +1,33 @@
 // Constants for pin declarations
 const byte limInterruptPin1 = 2;
 const byte limInterruptPin2 = 3;
-const int speakerPin = 4;
+const byte speakerPin = 4;
+const byte echoPin = 5;
+const byte trigPin = 6;
 const byte motorB1 = 9;
 const byte motorB2 = 8;
 
 // Variables
-byte receivedBit = 0;
+byte proximityFlag = 0;
 byte stateFlag = 0;
 volatile byte lim1Flag = 0;
 volatile byte lim2Flag = 0;
+long duration;
+int distance;
 
 void loop() {
-  if (Serial.available() > 0) {
-    receivedBit = Serial.read();
-    if (receivedBit == 49) {
-      openLid(motorB1, motorB2);
-      yell(speakerPin, 1000, 3000, 10);
-      stateFlag = 2;
-    }
+  if (proximityFlag == 0) {
+    distance = proximityRead(trigPin, echoPin, distance, duration);   
+    if (distance < 30) {
+    proximityFlag = 1;
+    } 
+  }
+  
+  if (proximityFlag == 1) {
+    openLid(motorB1, motorB2);
+    yell(speakerPin, 1000, 3000, 10);
+    stateFlag = 2;
+    proximityFlag = 2;
   }
   if (lim1Flag == 1 && stateFlag == 2) {
     stopMotor(motorB1, motorB2);
@@ -29,6 +38,7 @@ void loop() {
   if (lim2Flag == 1 && stateFlag == 1) {
     stopMotor(motorB1, motorB2);
     stateFlag = 0;
+    proximityFlag = 0;
   }
 
 }
@@ -48,14 +58,16 @@ void setup() {
   // Set the output pin to the operational amp that outputs to a speaker
   pinMode(speakerPin, OUTPUT);
 
+  // Setup the pins for the ultrasonic sensor
+  pinMode(trigPin, OUTPUT);   //Sets the trigPin as an Output
+  pinMode(echoPin, INPUT);    //Sets the echoPin as an Input
+
   // Setup the Interrupts
   attachInterrupt(digitalPinToInterrupt(limInterruptPin1), limit1Hit, FALLING);
   attachInterrupt(digitalPinToInterrupt(limInterruptPin2), limit2Hit, FALLING);
 
   // Initialize the motor to be stopped
   stopMotor(motorB1, motorB2);
-  
-  Serial.begin(9600);
 }
 
 //-------------------------------------------------------------------------------------
@@ -107,4 +119,27 @@ void yell(byte outputPin, int minFreq, int maxFreq, int delayTime) {
     delay(delayTime);
   }
   noTone(outputPin);
+}
+//-------------------------------------------------------------------------------------
+
+// Ultra Sonic Sensor Function
+
+int proximityRead(byte trigOutputPin, byte echoOutputPin, int dist, long dur) {
+  //Clear the trigPin
+  digitalWrite(trigOutputPin, LOW);
+  delayMicroseconds(2);
+
+  //Sets the trigPin HIGH for 10 microseconds to intialize Ultrasonic pulse
+  digitalWrite(trigOutputPin, HIGH);
+  delayMicroseconds(20);
+  digitalWrite(trigOutputPin, LOW);
+
+  //Reads the echoPin, returns the second wave travel time in microseconds
+  dur = pulseIn(echoOutputPin, HIGH);
+
+  //Calculate the distance:
+  dist = dur/58; //Note: 0.034 represents the speed of sound in cm/us
+                               //Note: We divide by two because the pulse travels back and forth which is double the distance we want
+                               
+  return dist;
 }

@@ -1,6 +1,6 @@
 //constants
-const int trigPin = 6;
-const int echoPin = 5;
+const byte trigPin = 6;
+const byte echoPin = 5;
 
 //variables
 long duration;
@@ -13,26 +13,32 @@ void setup() {
 }
 
 void loop() {
-  //Clear the trigPin
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-
-  //Sets the trigPin HIGH for 10 microseconds to intialize Ultrasonic pulse
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(20);
-  digitalWrite(trigPin, LOW);
-
-  //Reads the echoPin, returns the second wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
-
-  //Calculate the distance:
-  distance = duration/58; //Note: 0.034 represents the speed of sound in cm/us
-                               //Note: We divide by two because the pulse travels back and forth which is double the distance we want
-
-  if (distance < 10) {
+  distance = proximityRead(trigPin, echoPin, distance, duration);
+  
+  if (distance < 30) {
     //Prints the distance on the Serial Monitor
     Serial.print("Distance: ");
     Serial.println(distance);
   } 
   
+}
+
+int proximityRead(byte trigOutputPin, byte echoOutputPin, int dist, long dur) {
+  //Clear the trigPin
+  digitalWrite(trigOutputPin, LOW);
+  delayMicroseconds(2);
+
+  //Sets the trigPin HIGH for 10 microseconds to intialize Ultrasonic pulse
+  digitalWrite(trigOutputPin, HIGH);
+  delayMicroseconds(20);
+  digitalWrite(trigOutputPin, LOW);
+
+  //Reads the echoPin, returns the second wave travel time in microseconds
+  dur = pulseIn(echoOutputPin, HIGH);
+
+  //Calculate the distance:
+  dist = dur/58; //Note: 0.034 represents the speed of sound in cm/us
+                               //Note: We divide by two because the pulse travels back and forth which is double the distance we want
+                               
+  return dist;
 }

@@ -82,12 +82,12 @@ void stopMotor(byte motorIn1, byte motorIn2) {
 }
 // Move the motor clockwise
 void openLid(byte motorIn1, byte motorIn2) {
-  digitalWrite(motor_b1, HIGH);
-  digitalWrite(motor_b2, LOW);
+  digitalWrite(motorIn1, HIGH);
+  digitalWrite(motorIn2, LOW);
 }
 // Move the motor counterclockwise
 void closeLid(byte motorIn1, byte motorIn2) {
-  digitalWrite(motor_b1, LOW);
-  digitalWrite(motor_b2, HIGH);
+  digitalWrite(motorIn1, LOW);
+  digitalWrite(motorIn2, HIGH);
 }
 //-------------------------------------------------------------------------------------

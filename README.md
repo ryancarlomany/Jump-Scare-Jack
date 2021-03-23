@@ -8,4 +8,5 @@ The Jump Scare Jack In the Box, uses the following components for the electrical
   5. Speaker from Old Laptop (HP 316731-001 REV C)
   6. L7805CV Linear Regulator
   7. 2 x Mirco Limit Switches (B07ZVJD1GC)
+
 Any additional components (resistors, capacitors, etc) can be found by following the typical application schematics from the datasheets for the parts listed above.

@@ -4,8 +4,8 @@ const byte limInterruptPin2 = 3;
 const byte speakerPin = 4;
 const byte echoPin = 5;
 const byte trigPin = 6;
-const byte motorB1 = 9;
-const byte motorB2 = 8;
+const byte motorB1 = A0;
+const byte motorB2 = A1;
 
 // Variables
 byte proximityFlag = 0;

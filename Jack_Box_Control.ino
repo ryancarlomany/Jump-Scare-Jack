@@ -3,17 +3,22 @@ const byte limInterruptPin1 = 2;
 const byte limInterruptPin2 = 3;
 const byte speakerPin = 4;
 const byte echoPin = 5;
-const byte trigPin = 6;
+const byte trigPin = 7;
 const byte motorB1 = A0;
 const byte motorB2 = A1;
+const byte motorEnable = 6;
 
 // Variables
 byte proximityFlag = 0;
 byte stateFlag = 0;
+byte closingSpeed = 50;
 volatile byte lim1Flag = 0;
 volatile byte lim2Flag = 0;
 long duration;
 int distance;
+
+//-------------------------------------------------------------------------------------
+// Loop Function
 
 void loop() {
   if (proximityFlag == 0) {
@@ -32,13 +37,14 @@ void loop() {
   if (lim1Flag == 1 && stateFlag == 2) {
     stopMotor(motorB1, motorB2);
     delay(5000);
-    closeLid(motorB1, motorB2);
+    closeLid(motorB1, motorB2, closingSpeed);
     stateFlag = 1;
   }
   if (lim2Flag == 1 && stateFlag == 1) {
     stopMotor(motorB1, motorB2);
     stateFlag = 0;
     proximityFlag = 0;
+    delay(5000);
   }
 
 }
@@ -99,11 +105,13 @@ void stopMotor(byte motorIn1, byte motorIn2) {
 }
 // Move the motor clockwise
 void openLid(byte motorIn1, byte motorIn2) {
+  analogWrite(motorEnable, 255);
   digitalWrite(motorIn1, HIGH);
   digitalWrite(motorIn2, LOW);
 }
 // Move the motor counterclockwise
-void closeLid(byte motorIn1, byte motorIn2) {
+void closeLid(byte motorIn1, byte motorIn2, byte motorSpeed) {
+  analogWrite(motorEnable, motorSpeed);
   digitalWrite(motorIn1, LOW);
   digitalWrite(motorIn2, HIGH);
 }

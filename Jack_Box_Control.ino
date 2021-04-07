@@ -11,7 +11,9 @@ const byte motorEnable = 6;
 // Variables
 byte proximityFlag = 0;
 byte stateFlag = 0;
-byte closingSpeed = 50;
+byte closingSpeed = 100;
+byte openSpeed = 255;
+byte triggerDistance = 100;
 volatile byte lim1Flag = 0;
 volatile byte lim2Flag = 0;
 long duration;
@@ -22,14 +24,15 @@ int distance;
 
 void loop() {
   if (proximityFlag == 0) {
-    distance = proximityRead(trigPin, echoPin, distance, duration);   
-    if (distance < 30) {
+    distance = proximityRead(trigPin, echoPin, distance, duration);
+    
+    if (distance < triggerDistance) {
     proximityFlag = 1;
     } 
   }
   
   if (proximityFlag == 1) {
-    openLid(motorB1, motorB2);
+    openLid(motorB1, motorB2, openSpeed);
     yell(speakerPin, 1000, 3000, 10);
     stateFlag = 2;
     proximityFlag = 2;
@@ -38,6 +41,7 @@ void loop() {
     stopMotor(motorB1, motorB2);
     delay(5000);
     closeLid(motorB1, motorB2, closingSpeed);
+    closingYell(speakerPin, 10);
     stateFlag = 1;
   }
   if (lim2Flag == 1 && stateFlag == 1) {
@@ -74,6 +78,8 @@ void setup() {
 
   // Initialize the motor to be stopped
   stopMotor(motorB1, motorB2);
+
+  randomSeed(analogRead(5)); //Uses noise from the unconnected A5 pin to generate a random seed number for the Jack Box scream
 }
 
 //-------------------------------------------------------------------------------------
@@ -104,8 +110,8 @@ void stopMotor(byte motorIn1, byte motorIn2) {
   digitalWrite(motorIn2, LOW);
 }
 // Move the motor clockwise
-void openLid(byte motorIn1, byte motorIn2) {
-  analogWrite(motorEnable, 255);
+void openLid(byte motorIn1, byte motorIn2, byte motorSpeed) {
+  analogWrite(motorEnable, motorSpeed);
   digitalWrite(motorIn1, HIGH);
   digitalWrite(motorIn2, LOW);
 }
@@ -115,15 +121,24 @@ void closeLid(byte motorIn1, byte motorIn2, byte motorSpeed) {
   digitalWrite(motorIn1, LOW);
   digitalWrite(motorIn2, HIGH);
 }
+
 //-------------------------------------------------------------------------------------
 
 // Speaker Function
 
 void yell(byte outputPin, int minFreq, int maxFreq, int delayTime) {
-  int freqStep = (maxFreq - minFreq) / 100;
+  int freqStep = (maxFreq - minFreq) / 50;
   
   for (int freq = minFreq; freq < maxFreq; freq += freqStep) {
     tone(outputPin, freq); // Outputs a tone of the specified frequency to a speaker
+    delay(delayTime);
+  }
+  noTone(outputPin);
+}
+
+void closingYell(byte outputPin, int delayTime) {
+  for (int incr = 0; incr < 100; incr += 1) {
+    tone(outputPin, random(100, 500));
     delay(delayTime);
   }
   noTone(outputPin);
